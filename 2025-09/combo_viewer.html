@@ -1,0 +1,3711 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>コンボ緩和条件ビューア</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-css-reset/2.4.0/reset.min.css">
+<style>
+  body { font-family: sans-serif; margin: 2rem; }
+  h2 { margin-top:1.5rem; }
+  .filter-box { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .filter-box label { white-space:nowrap; }
+  #results li { margin: .25rem 0; }
+  .nohit { color:#888; }
+</style>
+</head>
+<body>
+
+<h1>コンボ緩和条件ビューア</h1>
+
+<h2>① Dr を選択</h2>
+<div id="doctorBox" class="filter-box">
+  <label><input type="checkbox" class="doctor" value="Dr原"> Dr原</label><label><input type="checkbox" class="doctor" value="Dr又吉"> Dr又吉</label><label><input type="checkbox" class="doctor" value="Dr大城"> Dr大城</label><label><input type="checkbox" class="doctor" value="Dr大塚"> Dr大塚</label><label><input type="checkbox" class="doctor" value="Dr嵩原"> Dr嵩原</label><label><input type="checkbox" class="doctor" value="Dr平良"> Dr平良</label><label><input type="checkbox" class="doctor" value="Dr座間味"> Dr座間味</label><label><input type="checkbox" class="doctor" value="Dr新里"> Dr新里</label><label><input type="checkbox" class="doctor" value="Dr浦崎"> Dr浦崎</label><label><input type="checkbox" class="doctor" value="Dr石橋"> Dr石橋</label><label><input type="checkbox" class="doctor" value="Dr錦織"> Dr錦織</label><label><input type="checkbox" class="doctor" value="Dr鎌田"> Dr鎌田</label>
+</div>
+
+<h2>② 枠（日時+コール）を選択</h2>
+<div id="slotBox" class="filter-box">
+  <label><input type="checkbox" class="slot" value="2025-09-01の夜間1stコール"> 2025-09-01の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-02の夜間1stコール"> 2025-09-02の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-04の夜間2ndコール"> 2025-09-04の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-05の夜間2ndコール"> 2025-09-05の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-06の夜間1stコール"> 2025-09-06の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-06の夜間2ndコール"> 2025-09-06の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-06の日中1stコール"> 2025-09-06の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-06の日中2ndコール"> 2025-09-06の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-07の夜間1stコール"> 2025-09-07の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-07の日中1stコール"> 2025-09-07の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-07の日中2ndコール"> 2025-09-07の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-08の夜間1stコール"> 2025-09-08の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-08の夜間2ndコール"> 2025-09-08の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-09の夜間1stコール"> 2025-09-09の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-12の夜間2ndコール"> 2025-09-12の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-13の夜間1stコール"> 2025-09-13の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-13の日中2ndコール"> 2025-09-13の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-14の夜間1stコール"> 2025-09-14の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-14の日中1stコール"> 2025-09-14の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-14の日中2ndコール"> 2025-09-14の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-15の夜間1stコール"> 2025-09-15の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-15の夜間2ndコール"> 2025-09-15の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-15の日中1stコール"> 2025-09-15の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-16の夜間1stコール"> 2025-09-16の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-16の夜間2ndコール"> 2025-09-16の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-17の夜間1stコール"> 2025-09-17の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-17の夜間2ndコール"> 2025-09-17の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-18の夜間2ndコール"> 2025-09-18の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-19の夜間1stコール"> 2025-09-19の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-19の夜間2ndコール"> 2025-09-19の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-20の夜間1stコール"> 2025-09-20の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-20の夜間2ndコール"> 2025-09-20の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-20の日中1stコール"> 2025-09-20の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-20の日中2ndコール"> 2025-09-20の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-21の夜間1stコール"> 2025-09-21の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-21の夜間2ndコール"> 2025-09-21の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-21の日中1stコール"> 2025-09-21の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-21の日中2ndコール"> 2025-09-21の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-22の夜間1stコール"> 2025-09-22の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-22の夜間2ndコール"> 2025-09-22の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-23の夜間1stコール"> 2025-09-23の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-23の日中1stコール"> 2025-09-23の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-24の夜間1stコール"> 2025-09-24の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-24の夜間2ndコール"> 2025-09-24の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-25の夜間2ndコール"> 2025-09-25の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-26の夜間1stコール"> 2025-09-26の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-26の夜間2ndコール"> 2025-09-26の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-27の夜間1stコール"> 2025-09-27の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-27の夜間2ndコール"> 2025-09-27の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-27の日中1stコール"> 2025-09-27の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-27の日中2ndコール"> 2025-09-27の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-28の夜間1stコール"> 2025-09-28の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-28の夜間2ndコール"> 2025-09-28の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-28の日中1stコール"> 2025-09-28の日中1stコール</label><label><input type="checkbox" class="slot" value="2025-09-28の日中2ndコール"> 2025-09-28の日中2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-29の夜間1stコール"> 2025-09-29の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-29の夜間2ndコール"> 2025-09-29の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2025-09-30の夜間1stコール"> 2025-09-30の夜間1stコール</label><label><input type="checkbox" class="slot" value="2025-09-30の夜間2ndコール"> 2025-09-30の夜間2ndコール</label>
+</div>
+
+<h2>③ 該当 solution</h2>
+<ul id="results"></ul>
+
+<script>
+const combos = [
+{
+"combo": [
+"Dr原"
+],
+"conditions": [],
+"solution": "solution_Dr原.pdf"
+},
+{
+"combo": [
+"Dr石橋"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-21の日中2ndコール不可"
+],
+"solution": "solution_Dr石橋.pdf"
+},
+{
+"combo": [
+"Dr新里"
+],
+"conditions": [],
+"solution": "solution_Dr新里.pdf"
+},
+{
+"combo": [
+"Dr浦崎"
+],
+"conditions": [],
+"solution": "solution_Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr大塚"
+],
+"conditions": [],
+"solution": "solution_Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr嵩原"
+],
+"conditions": [],
+"solution": "solution_Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr平良"
+],
+"conditions": [],
+"solution": "solution_Dr平良.pdf"
+},
+{
+"combo": [
+"Dr大城"
+],
+"conditions": [],
+"solution": "solution_Dr大城.pdf"
+},
+{
+"combo": [
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr又吉"
+],
+"conditions": [],
+"solution": "solution_Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋"
+],
+"conditions": [
+"メンバーDr原は2025-09-06の日中1stコール不可",
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr石橋.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr新里.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr平良"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大城"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-26の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr又吉"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-21の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr平良は2025-09-07の夜間1stコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-12の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-15の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-14の日中2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-20の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-22の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚"
+],
+"conditions": [],
+"solution": "solution_Dr新里・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-28の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr新里・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-06の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr大城は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-01の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-22の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr浦崎・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原"
+],
+"conditions": [],
+"solution": "solution_Dr大塚・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr大塚は2025-09-26の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-12の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可"
+],
+"solution": "solution_Dr大塚・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-19の夜間1stコール不可",
+"メンバーDr大塚は2025-09-27の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr大塚・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-25の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr嵩原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr平良は2025-09-07の日中1stコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-24の夜間2ndコール不可"
+],
+"solution": "solution_Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-23の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-23の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の日中1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-02の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr鎌田は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr又吉は2025-09-30の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr新里"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr新里は2025-09-30の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr新里.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr浦崎"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-05の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-08の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-06の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-27の日中2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr石橋",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-05の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr石橋・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr浦崎"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-24の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr大塚"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr新里・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr原は2025-09-20の夜間1stコール不可",
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr大城は2025-09-21の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-06の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-24の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-22の夜間1stコール不可",
+"メンバーDr錦織は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr新里・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr新里",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr新里・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-28の日中1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr大城は2025-09-09の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-23の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr原は2025-09-24の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr浦崎・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr浦崎",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr浦崎・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr嵩原"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr大塚・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-29の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr大塚・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr大塚・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-29の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr大塚・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr大塚・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr大塚・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大塚",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr大塚・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr平良は2025-09-22の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr嵩原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr嵩原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-28の夜間2ndコール不可"
+],
+"solution": "solution_Dr原・Dr嵩原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-28の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr嵩原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可",
+"メンバーDr錦織は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr嵩原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr大城は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr平良は2025-09-16の夜間1stコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr原は2025-09-17の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の日中1stコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-13の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-13の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-08の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr原・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr原・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr又吉は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-01の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr原・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr原",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr原・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr浦崎"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-14の日中2ndコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr浦崎.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-14の夜間1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-15の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-26の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-27の日中2ndコール不可",
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr新里",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr新里は2025-09-30の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr新里・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-27の日中2ndコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr嵩原は2025-09-25の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-20の日中2ndコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-21の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-20の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr浦崎",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr浦崎・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-19の夜間1stコール不可",
+"メンバーDr大塚は2025-09-27の日中1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-26の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-14の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-16の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大塚",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-29の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr大塚・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-29の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-26の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-22の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-08の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-04の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr平良は2025-09-07の夜間1stコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-15の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr平良は2025-09-13の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-27の日中2ndコール不可",
+"メンバーDr大城は2025-09-14の日中1stコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-22の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-16の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-07の日中2ndコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-18の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-22の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-26の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-17の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-21の日中2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-29の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-19の夜間2ndコール不可",
+"メンバーDr石橋は2025-09-13の日中2ndコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr石橋は2025-09-22の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-28の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr嵩原は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-29の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-24の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-22の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr浦崎",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr新里・Dr浦崎・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-20の日中2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr大塚・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-26の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大塚・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大塚・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr大塚・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-19の夜間1stコール不可",
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大塚・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大塚・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大塚",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr新里・Dr大塚・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-28の日中2ndコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-27の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-28の夜間2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-27の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の夜間1stコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-13の日中2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可",
+"メンバーDr又吉は2025-09-27の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr新里は2025-09-24の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr新里・Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-12の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr新里は2025-09-22の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr新里・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の夜間2ndコール不可"
+],
+"solution": "solution_Dr新里・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr新里は2025-09-16の夜間2ndコール不可",
+"メンバーDr新里は2025-09-29の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr新里は2025-09-17の夜間2ndコール不可",
+"メンバーDr新里は2025-09-22の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr新里",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr新里は2025-09-24の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr新里・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr大塚は2025-09-13の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr大塚は2025-09-26の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大塚",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr鎌田は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大塚・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr嵩原は2025-09-27の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-29の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可",
+"メンバーDr平良は2025-09-23の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr平良は2025-09-28の日中1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-30の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-23の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の夜間1stコール不可",
+"メンバーDr鎌田は2025-09-28の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の日中1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大城は2025-09-23の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-21の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-07の日中2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr浦崎・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-29の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-08の夜間1stコール不可",
+"メンバーDr浦崎は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr浦崎",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr浦崎は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-08の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr浦崎・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原",
+"Dr平良"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr嵩原は2025-09-26の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr嵩原・Dr平良.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-29の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr嵩原・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr大塚・Dr嵩原・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-29の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr嵩原・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr嵩原・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [],
+"solution": "solution_Dr大塚・Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-27の夜間2ndコール不可"
+],
+"solution": "solution_Dr大塚・Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-20の日中1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可"
+],
+"solution": "solution_Dr大塚・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-19の夜間2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-08の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-27の日中2ndコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr大塚・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-27の日中1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大塚は2025-09-30の夜間1stコール不可",
+"メンバーDr大塚は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr錦織は2025-09-08の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr平良",
+"Dr大城"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-24の夜間2ndコール不可",
+"メンバーDr大城は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr平良・Dr大城.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr平良",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-27の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可"
+],
+"solution": "solution_Dr嵩原・Dr平良・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr平良",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr平良・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr平良",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-05の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr平良・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr平良",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr平良は2025-09-07の日中1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr平良・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-26の夜間2ndコール不可"
+],
+"solution": "solution_Dr嵩原・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-13の日中2ndコール不可",
+"メンバーDr大城は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-24の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-16の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr嵩原・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可",
+"メンバーDr錦織は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-12の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-19の夜間2ndコール不可",
+"メンバーDr又吉は2025-09-14の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr嵩原は2025-09-18の夜間2ndコール不可",
+"メンバーDr嵩原は2025-09-24の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr大城",
+"Dr座間味"
+],
+"conditions": [
+"メンバーDr平良は2025-09-14の日中1stコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-28の日中2ndコール不可"
+],
+"solution": "solution_Dr平良・Dr大城・Dr座間味.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr大城",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr平良は2025-09-06の夜間1stコール不可",
+"メンバーDr平良は2025-09-14の日中1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr大城・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr大城",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の夜間1stコール不可",
+"メンバーDr平良は2025-09-27の夜間1stコール不可",
+"メンバーDr大城は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr大城・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr大城",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr大城は2025-09-29の夜間1stコール不可"
+],
+"solution": "solution_Dr平良・Dr大城・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-13の日中2ndコール不可"
+],
+"solution": "solution_Dr平良・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr平良・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-18の夜間2ndコール不可"
+],
+"solution": "solution_Dr平良・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr平良は2025-09-21の夜間1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr平良は2025-09-27の夜間1stコール不可",
+"メンバーDr平良は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可"
+],
+"solution": "solution_Dr平良・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr平良",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr平良は2025-09-14の夜間1stコール不可",
+"メンバーDr平良は2025-09-21の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr平良・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr座間味",
+"Dr又吉"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-13の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可"
+],
+"solution": "solution_Dr大城・Dr座間味・Dr又吉.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr座間味",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-28の夜間2ndコール不可"
+],
+"solution": "solution_Dr大城・Dr座間味・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr座間味",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の夜間1stコール不可",
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可"
+],
+"solution": "solution_Dr大城・Dr座間味・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-30の夜間1stコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大城・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大城は2025-09-15の日中1stコール不可",
+"メンバーDr又吉は2025-09-14の日中1stコール不可",
+"メンバーDr鎌田は2025-09-27の日中1stコール不可"
+],
+"solution": "solution_Dr大城・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr大城",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大城は2025-09-14の日中1stコール不可",
+"メンバーDr錦織は2025-09-01の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr大城・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr座間味",
+"Dr又吉",
+"Dr錦織"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-27の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr座間味・Dr又吉・Dr錦織.pdf"
+},
+{
+"combo": [
+"Dr座間味",
+"Dr又吉",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-19の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-27の日中2ndコール不可",
+"メンバーDr又吉は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr座間味・Dr又吉・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr座間味",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr座間味は2025-09-17の夜間2ndコール不可",
+"メンバーDr座間味は2025-09-25の夜間2ndコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr座間味・Dr錦織・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr又吉",
+"Dr錦織",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr又吉は2025-09-15の夜間1stコール不可",
+"メンバーDr又吉は2025-09-22の夜間1stコール不可",
+"メンバーDr錦織は2025-09-15の日中1stコール不可"
+],
+"solution": "solution_Dr又吉・Dr錦織・Dr鎌田.pdf"
+}
+];
+
+function updateResults() {
+  const selectedDrs   = Array.from(document.querySelectorAll('.doctor:checked')).map(el=>el.value);
+  const selectedSlots = Array.from(document.querySelectorAll('.slot:checked'  )).map(el=>el.value);
+
+  const hits = combos.filter(c => {
+      // Dr チェックは「緩和条件に Dr 名が含まれるか」を見る
+      const condStr = c.conditions.join(" ");
+      const drOK    = selectedDrs.every(dr => condStr.includes(dr));
+      const slotOK  = selectedSlots.every(sl => condStr.includes(sl));
+      return drOK && slotOK;
+  });
+
+  const ul = document.getElementById('results');
+  ul.innerHTML = '';
+  if (hits.length === 0) {
+     ul.innerHTML = '<li class="nohit">該当なし</li>';
+  } else {
+     hits.forEach(c => {
+        const li = document.createElement('li');
+        const a  = document.createElement('a');
+        a.href = c.solution;
+        a.textContent = c.solution;
+        a.target = "_blank";
+        li.appendChild(a);
+        ul.appendChild(li);
+     });
+  }
+}
+
+// 変更イベント
+document.querySelectorAll('.doctor, .slot').forEach(el => el.addEventListener('change', updateResults));
+</script>
+
+</body>
+</html>
