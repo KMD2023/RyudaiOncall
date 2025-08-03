@@ -10,6 +10,7 @@
   .filter-box { display:flex; flex-wrap:wrap; gap:.5rem; }
   .filter-box label { white-space:nowrap; }
   #results li { margin: .25rem 0; }
+  #results li span { margin-left:.5rem; } 
   .nohit { color:#888; }
 </style>
 </head>
@@ -3692,13 +3693,23 @@ function updateResults() {
      ul.innerHTML = '<li class="nohit">該当なし</li>';
   } else {
      hits.forEach(c => {
-        const li = document.createElement('li');
-        const a  = document.createElement('a');
-        a.href = c.solution;
-        a.textContent = c.solution;
-        a.target = "_blank";
-        li.appendChild(a);
-        ul.appendChild(li);
+      const li = document.createElement('li');
+
+      // ▼ solution へのリンク
+      const link = document.createElement('a');
+      link.href        = c.solution;
+      link.textContent = c.solution;
+      link.target      = '_blank';
+      li.appendChild(link);
+
+      // ▼ 緩和条件（存在する場合だけ）
+      if (c.conditions.length) {
+        const cond = document.createElement('span');
+        cond.textContent = c.conditions.join(' / ');
+        li.appendChild(cond);
+      }
+
+      ul.appendChild(li);
      });
   }
 }
