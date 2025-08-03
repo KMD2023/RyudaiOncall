@@ -3714,6 +3714,8 @@ function updateResults() {
 
 // 変更イベント
 document.querySelectorAll('.doctor, .slot').forEach(el => el.addEventListener('change', updateResults));
+
+window.addEventListener('load', updateResults);
 </script>
 
 </body>
