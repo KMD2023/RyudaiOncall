@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>コンボ緩和条件ビューア</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-css-reset/2.4.0/reset.min.css">
+<style>
+  body { font-family: sans-serif; margin: 2rem; }
+  h2 { margin-top:1.5rem; }
+  .filter-box { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .filter-box label { white-space:nowrap; }
+  #results li { margin: .25rem 0; }
+  .nohit { color:#888; }
+</style>
+</head>
+<body>
+
+<h1>コンボ緩和条件ビューア</h1>
+
+<h2>① Dr を選択</h2>
+<div id="doctorBox" class="filter-box">
+  <label><input type="checkbox" class="doctor" value="Dr会田"> Dr会田</label><label><input type="checkbox" class="doctor" value="Dr大塚"> Dr大塚</label><label><input type="checkbox" class="doctor" value="Dr大田"> Dr大田</label><label><input type="checkbox" class="doctor" value="Dr嵩原"> Dr嵩原</label><label><input type="checkbox" class="doctor" value="Dr松元"> Dr松元</label><label><input type="checkbox" class="doctor" value="Dr栗原"> Dr栗原</label><label><input type="checkbox" class="doctor" value="Dr比嘉"> Dr比嘉</label><label><input type="checkbox" class="doctor" value="Dr照屋"> Dr照屋</label><label><input type="checkbox" class="doctor" value="Dr石橋"> Dr石橋</label><label><input type="checkbox" class="doctor" value="Dr鎌田"> Dr鎌田</label>
+</div>
+
+<h2>② 枠（日時+コール）を選択</h2>
+<div id="slotBox" class="filter-box">
+  <label><input type="checkbox" class="slot" value="2026-07-15の夜間2ndコール"> 2026-07-15の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2026-07-18の日中1stコール"> 2026-07-18の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-07-18の日中2ndコール"> 2026-07-18の日中2ndコール</label><label><input type="checkbox" class="slot" value="2026-07-23の夜間1stコール"> 2026-07-23の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-07-23の夜間2ndコール"> 2026-07-23の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2026-07-24の夜間1stコール"> 2026-07-24の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-07-24の夜間2ndコール"> 2026-07-24の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2026-07-25の日中1stコール"> 2026-07-25の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-07-25の日中2ndコール"> 2026-07-25の日中2ndコール</label><label><input type="checkbox" class="slot" value="2026-07-27の夜間2ndコール"> 2026-07-27の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2026-07-30の夜間1stコール"> 2026-07-30の夜間1stコール</label>
+</div>
+
+<h2>③ 該当 solution</h2>
+<ul id="results"></ul>
+
+<script>
+const combos = [
+{
+"combo": [
+"Dr石橋"
+],
+"conditions": [
+"メンバーDr石橋は2026-07-25の日中2ndコール不可",
+"メンバーDr石橋は2026-07-18の日中1stコール不可"
+],
+"solution": "solution_Dr石橋.pdf"
+},
+{
+"combo": [
+"Dr大塚"
+],
+"conditions": [
+"メンバーDr大塚は2026-07-15の夜間2ndコール不可",
+"メンバーDr大塚は2026-07-23の夜間2ndコール不可"
+],
+"solution": "solution_Dr大塚.pdf"
+},
+{
+"combo": [
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr嵩原は2026-07-24の夜間1stコール不可",
+"メンバーDr嵩原は2026-07-18の日中1stコール不可"
+],
+"solution": "solution_Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr栗原"
+],
+"conditions": [
+"メンバーDr栗原は2026-07-23の夜間2ndコール不可",
+"メンバーDr栗原は2026-07-24の夜間1stコール不可"
+],
+"solution": "solution_Dr栗原.pdf"
+},
+{
+"combo": [
+"Dr大田"
+],
+"conditions": [
+"メンバーDr大田は2026-07-18の日中2ndコール不可",
+"メンバーDr大田は2026-07-24の夜間2ndコール不可"
+],
+"solution": "solution_Dr大田.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr石橋は2026-07-23の夜間1stコール不可",
+"メンバーDr嵩原は2026-07-25の日中1stコール不可"
+],
+"solution": "solution_Dr石橋・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr栗原"
+],
+"conditions": [
+"メンバーDr石橋は2026-07-23の夜間1stコール不可",
+"メンバーDr栗原は2026-07-25の日中2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr栗原.pdf"
+},
+{
+"combo": [
+"Dr石橋",
+"Dr大田"
+],
+"conditions": [
+"メンバーDr石橋は2026-07-25の日中2ndコール不可",
+"メンバーDr大田は2026-07-23の夜間2ndコール不可"
+],
+"solution": "solution_Dr石橋・Dr大田.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr嵩原"
+],
+"conditions": [
+"メンバーDr大塚は2026-07-27の夜間2ndコール不可",
+"メンバーDr嵩原は2026-07-25の日中2ndコール不可"
+],
+"solution": "solution_Dr大塚・Dr嵩原.pdf"
+},
+{
+"combo": [
+"Dr大塚",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr大塚は2026-07-23の夜間2ndコール不可",
+"メンバーDr鎌田は2026-07-30の夜間1stコール不可"
+],
+"solution": "solution_Dr大塚・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr会田"
+],
+"conditions": [
+"メンバーDr嵩原は2026-07-25の日中1stコール不可",
+"メンバーDr会田は2026-07-30の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr会田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr照屋"
+],
+"conditions": [
+"メンバーDr嵩原は2026-07-23の夜間1stコール不可",
+"メンバーDr照屋は2026-07-30の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr照屋.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr鎌田"
+],
+"conditions": [
+"メンバーDr嵩原は2026-07-23の夜間2ndコール不可",
+"メンバーDr鎌田は2026-07-30の夜間1stコール不可"
+],
+"solution": "solution_Dr嵩原・Dr鎌田.pdf"
+},
+{
+"combo": [
+"Dr嵩原",
+"Dr大田"
+],
+"conditions": [
+"メンバーDr嵩原は2026-07-25の日中1stコール不可",
+"メンバーDr大田は2026-07-23の夜間2ndコール不可"
+],
+"solution": "solution_Dr嵩原・Dr大田.pdf"
+},
+{
+"combo": [
+"Dr比嘉",
+"Dr大田"
+],
+"conditions": [
+"メンバーDr比嘉は2026-07-30の夜間1stコール不可",
+"メンバーDr大田は2026-07-23の夜間1stコール不可"
+],
+"solution": "solution_Dr比嘉・Dr大田.pdf"
+},
+{
+"combo": [
+"Dr会田",
+"Dr栗原"
+],
+"conditions": [
+"メンバーDr会田は2026-07-30の夜間1stコール不可",
+"メンバーDr栗原は2026-07-24の夜間1stコール不可"
+],
+"solution": "solution_Dr会田・Dr栗原.pdf"
+},
+{
+"combo": [
+"Dr栗原",
+"Dr大田"
+],
+"conditions": [
+"メンバーDr栗原は2026-07-24の夜間2ndコール不可",
+"メンバーDr大田は2026-07-25の日中1stコール不可"
+],
+"solution": "solution_Dr栗原・Dr大田.pdf"
+},
+{
+"combo": [
+"Dr松元",
+"Dr大田"
+],
+"conditions": [
+"メンバーDr松元は2026-07-30の夜間1stコール不可",
+"メンバーDr大田は2026-07-23の夜間2ndコール不可"
+],
+"solution": "solution_Dr松元・Dr大田.pdf"
+}
+];
+
+function updateResults() {
+  const selectedDrs   = Array.from(document.querySelectorAll('.doctor:checked')).map(el=>el.value);
+  const selectedSlots = Array.from(document.querySelectorAll('.slot:checked'  )).map(el=>el.value);
+
+  const hits = combos.filter(c => {
+      // Dr チェックは「緩和条件に Dr 名が含まれるか」を見る
+      const condStr = c.conditions.join(" ");
+      const drOK    = selectedDrs.every(dr => condStr.includes(dr));
+      const slotOK  = selectedSlots.every(sl => condStr.includes(sl));
+      return drOK && slotOK;
+  });
+
+  const ul = document.getElementById('results');
+  ul.innerHTML = '';
+  if (hits.length === 0) {
+     ul.innerHTML = '<li class="nohit">該当なし</li>';
+  } else {
+     hits.forEach(c => {
+        const li = document.createElement('li');
+        const a  = document.createElement('a');
+        a.href = c.solution;
+        a.textContent = c.solution;
+        a.target = "_blank";
+        li.appendChild(a);
+
+        // ★ ここを追加 ―― 緩和条件を横に表示
+        if (c.conditions.length) {
+            const span = document.createElement('span');
+            span.style.marginLeft = '0.5rem';
+            span.textContent = '— ' + c.conditions.join(' / ');
+            li.appendChild(span);
+        }
+
+        ul.appendChild(li);
+     });
+  }
+}
+
+// 変更イベント
+document.querySelectorAll('.doctor, .slot').forEach(el => el.addEventListener('change', updateResults));
+
+window.addEventListener('load', updateResults);
+</script>
+
+</body>
+</html>
