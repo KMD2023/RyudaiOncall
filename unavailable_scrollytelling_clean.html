@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>勤務不可枠と緩和候補のスクロール監査</title>
+<style>
+:root {
+  --ink:#172033; --muted:#667085; --line:#d7dce5;
+  --soft-red:rgba(255,102,102,.16); --red-line:rgba(220,38,38,.78);
+  --blue:#2563eb; --black:#111827; --gold:#facc15; --gold-line:#92400e; --green:#0f766e;
+  --top-h: 112px;
+}
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  margin:0;
+  color:var(--ink);
+  background:linear-gradient(180deg,#f7f8fc 0%,#eef2f7 100%);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","YuGothic","Noto Sans JP","Meiryo",system-ui,sans-serif;
+}
+#stage {
+  position: sticky;
+  top: 0;
+  min-height: 100vh;
+  padding: 10px 16px 14px;
+}
+#topbar {
+  min-height: var(--top-h);
+  background:rgba(255,255,255,.95);
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(15,23,42,.08);
+  padding:13px 16px 11px;
+  margin:0 auto 10px;
+  max-width: 1420px;
+}
+.status-grid {
+  display:grid;
+  grid-template-columns: 1.2fr 1fr auto;
+  gap: 14px;
+  align-items:center;
+}
+#candidateTitle {
+  font-size: clamp(22px, 2.8vw, 38px);
+  font-weight: 950;
+  letter-spacing:-.04em;
+  line-height:1.05;
+}
+#currentDoctor {
+  font-size: clamp(22px, 2.7vw, 36px);
+  font-weight: 950;
+  color: var(--blue);
+  letter-spacing:-.04em;
+  line-height:1.05;
+}
+#modeText, #relaxText, #progressText {
+  color: var(--muted);
+  font-size: 13px;
+  line-height:1.45;
+}
+#progressTrack {
+  height: 8px;
+  background:#eef2f7;
+  border-radius:999px;
+  overflow:hidden;
+  margin-top:10px;
+}
+#progressFill {
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#2563eb,#0f766e);
+  border-radius:999px;
+}
+.legend {
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-end;
+  gap:8px 12px;
+  color:var(--muted);
+  font-size:12px;
+}
+.legend span { display:inline-flex; align-items:center; gap:5px; white-space:nowrap; }
+.dot { width:12px; height:12px; border-radius:999px; display:inline-block; background:var(--black); }
+.dot.blue { background:var(--blue); box-shadow:0 0 0 3px rgba(37,99,235,.13); }
+.star { color:var(--gold-line); font-size:15px; }
+.redbox { width:18px; height:13px; display:inline-block; background:var(--soft-red); border:2px solid var(--red-line); border-radius:3px; }
+
+#calendar {
+  max-width:1420px;
+  margin:0 auto;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:18px;
+  box-shadow:0 18px 48px rgba(15,23,42,.10);
+  overflow:hidden;
+}
+.weekhead, .week { display:grid; grid-template-columns:repeat(7,1fr); }
+.weekhead > div {
+  padding:7px 4px;
+  text-align:center;
+  font-weight:950;
+  color:#475569;
+  background:#f8fafc;
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  font-size:13px;
+}
+.weekhead > div:last-child { border-right:none; }
+.weekhead .wd-0, .weekhead .wd-6 { color:#b91c1c; }
+.day {
+  min-height: min(17vh, 124px);
+  border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  padding:5px;
+  background:white;
+  position:relative;
+}
+.week .day:nth-child(7n) { border-right:none; }
+.day.out { background:#f8fafc; }
+.date-num {
+  font-weight:950;
+  font-size:14px;
+  color:#334155;
+  margin-bottom:3px;
+}
+.date-num.red-date { color:#b91c1c; }
+.role-lane {
+  height:21px;
+  border:1px solid transparent;
+  border-radius:7px;
+  margin:2px 0;
+  display:grid;
+  grid-template-columns:18px 24px 1fr;
+  align-items:center;
+  gap:2px;
+  padding:1px 3px;
+  font-size:10px;
+  line-height:1;
+  color:#64748b;
+  position:relative;
+  overflow:hidden;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.role-short { color:#94a3b8; font-size:9px; font-weight:950; grid-column:2; }
+.role-lane.active-unavailable {
+  background:var(--soft-red);
+  border-color:var(--red-line);
+  box-shadow:inset 0 0 0 1px rgba(220,38,38,.20);
+}
+.mark {
+  width:13px; height:13px; border-radius:999px; justify-self:center;
+  opacity:0; transform:scale(.68); transition:all .20s ease;
+  grid-column:1;
+}
+.role-lane.assigned .mark { opacity:1; transform:scale(1); }
+.role-lane.assigned.past .mark { background:var(--black); }
+.role-lane.assigned.active .mark { background:var(--blue); box-shadow:0 0 0 4px rgba(37,99,235,.16); }
+.role-lane.assigned.relaxed .mark {
+  background:transparent; box-shadow:none; color:var(--gold-line);
+  font-size:18px; width:18px; height:18px; line-height:16px;
+}
+.role-lane.assigned.relaxed .mark::before {
+  content:"★";
+  color:var(--gold);
+  -webkit-text-stroke:.6px var(--gold-line);
+  text-shadow:0 1px 0 rgba(0,0,0,.25);
+}
+.assignment-name {
+  grid-column:3;
+  white-space:nowrap; overflow:hidden; text-overflow:clip;
+  opacity:0; transform:translateX(-3px); transition:all .20s ease;
+  font-weight:850;
+}
+.role-lane.assigned.past .assignment-name { opacity:.86; color:#111827; }
+.role-lane.assigned.active .assignment-name { opacity:1; color:var(--blue); }
+.role-lane.assigned.relaxed .assignment-name { color:#92400e; }
+
+#scrollSpace {
+  height: calc(72 * 46vh);
+}
+#stepCounter {
+  font-variant-numeric: tabular-nums;
+  font-weight:800;
+  color:#475569;
+}
+.pill {
+  display:inline-block;
+  padding:2px 7px;
+  border-radius:999px;
+  background:#eef2ff;
+  color:#3730a3;
+  font-size:11px;
+  font-weight:900;
+  margin:1px 2px 1px 0;
+}
+#fallbackNote {
+  max-width:1420px;
+  margin:8px auto 0;
+  font-size:12px;
+  color:#b45309;
+  display:none;
+}
+@media (max-width: 920px) {
+  :root { --top-h: 150px; }
+  #stage { padding:8px; }
+  .status-grid { grid-template-columns:1fr; gap:7px; }
+  .legend { justify-content:flex-start; }
+  .day { min-height: 104px; padding:4px; }
+  .role-lane { height:19px; grid-template-columns:16px 20px 1fr; font-size:9px; }
+}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="topbar">
+    <div class="status-grid">
+      <div>
+        <div id="candidateTitle">勤務不可枠と緩和候補の確認</div>
+        <div id="modeText">スクロールで確認を開始</div>
+      </div>
+      <div>
+        <div id="currentDoctor">-</div>
+        <div id="relaxText">緩和候補: Dr大塚: 2026-07-23 Dr大塚 夜2 / Dr大田: 2026-07-23 Dr大田 夜2 / Dr嵩原: 2026-07-24 Dr嵩原 夜2 / Dr栗原: 2026-07-23 Dr栗原 夜1 / Dr石橋: 2026-07-23 Dr石橋 夜2</div>
+      </div>
+      <div class="legend">
+        <span><i class="dot blue"></i>表示中Dr</span>
+        <span><i class="dot"></i>確認済み</span>
+        <span><b class="star">★</b>緩和候補</span>
+        <span><i class="redbox"></i>表示中Drの不可枠</span>
+      </div>
+    </div>
+    <div id="progressText"><span id="stepCounter">0 / 71</span></div>
+    <div id="progressTrack"><div id="progressFill"></div></div>
+  </div>
+
+  <div id="calendar">
+    <div class="weekhead"><div class="wd wd-0">日</div><div class="wd wd-1">月</div><div class="wd wd-2">火</div><div class="wd wd-3">水</div><div class="wd wd-4">木</div><div class="wd wd-5">金</div><div class="wd wd-6">土</div></div>
+<div class="week">
+<div class="day out"></div>
+<div class="day out"></div>
+<div class="day out"></div>
+<div class="day" data-date="2026-07-01">
+  <div class="date-num">1</div>
+  <div class="role-lane" data-date="2026-07-01" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-01" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-01" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-01" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-02">
+  <div class="date-num">2</div>
+  <div class="role-lane" data-date="2026-07-02" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-02" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-02" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-02" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-03">
+  <div class="date-num">3</div>
+  <div class="role-lane" data-date="2026-07-03" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-03" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-03" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-03" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-04">
+  <div class="date-num red-date">4</div>
+  <div class="role-lane" data-date="2026-07-04" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-04" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-04" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-04" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+</div>
+<div class="week">
+<div class="day" data-date="2026-07-05">
+  <div class="date-num red-date">5</div>
+  <div class="role-lane" data-date="2026-07-05" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-05" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-05" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-05" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-06">
+  <div class="date-num">6</div>
+  <div class="role-lane" data-date="2026-07-06" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-06" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-06" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-06" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-07">
+  <div class="date-num">7</div>
+  <div class="role-lane" data-date="2026-07-07" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-07" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-07" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-07" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-08">
+  <div class="date-num">8</div>
+  <div class="role-lane" data-date="2026-07-08" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-08" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-08" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-08" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-09">
+  <div class="date-num">9</div>
+  <div class="role-lane" data-date="2026-07-09" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-09" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-09" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-09" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-10">
+  <div class="date-num">10</div>
+  <div class="role-lane" data-date="2026-07-10" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-10" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-10" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-10" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-11">
+  <div class="date-num red-date">11</div>
+  <div class="role-lane" data-date="2026-07-11" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-11" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-11" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-11" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+</div>
+<div class="week">
+<div class="day" data-date="2026-07-12">
+  <div class="date-num red-date">12</div>
+  <div class="role-lane" data-date="2026-07-12" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-12" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-12" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-12" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-13">
+  <div class="date-num">13</div>
+  <div class="role-lane" data-date="2026-07-13" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-13" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-13" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-13" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-14">
+  <div class="date-num">14</div>
+  <div class="role-lane" data-date="2026-07-14" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-14" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-14" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-14" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-15">
+  <div class="date-num">15</div>
+  <div class="role-lane" data-date="2026-07-15" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-15" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-15" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-15" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-16">
+  <div class="date-num">16</div>
+  <div class="role-lane" data-date="2026-07-16" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-16" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-16" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-16" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-17">
+  <div class="date-num">17</div>
+  <div class="role-lane" data-date="2026-07-17" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-17" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-17" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-17" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-18">
+  <div class="date-num red-date">18</div>
+  <div class="role-lane" data-date="2026-07-18" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-18" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-18" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-18" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+</div>
+<div class="week">
+<div class="day" data-date="2026-07-19">
+  <div class="date-num red-date">19</div>
+  <div class="role-lane" data-date="2026-07-19" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-19" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-19" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-19" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-20">
+  <div class="date-num red-date">20</div>
+  <div class="role-lane" data-date="2026-07-20" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-20" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-20" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-20" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-21">
+  <div class="date-num">21</div>
+  <div class="role-lane" data-date="2026-07-21" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-21" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-21" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-21" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-22">
+  <div class="date-num">22</div>
+  <div class="role-lane" data-date="2026-07-22" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-22" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-22" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-22" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-23">
+  <div class="date-num">23</div>
+  <div class="role-lane" data-date="2026-07-23" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-23" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-23" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-23" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-24">
+  <div class="date-num">24</div>
+  <div class="role-lane" data-date="2026-07-24" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-24" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-24" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-24" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-25">
+  <div class="date-num red-date">25</div>
+  <div class="role-lane" data-date="2026-07-25" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-25" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-25" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-25" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+</div>
+<div class="week">
+<div class="day" data-date="2026-07-26">
+  <div class="date-num red-date">26</div>
+  <div class="role-lane" data-date="2026-07-26" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-26" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-26" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-26" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-27">
+  <div class="date-num">27</div>
+  <div class="role-lane" data-date="2026-07-27" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-27" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-27" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-27" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-28">
+  <div class="date-num">28</div>
+  <div class="role-lane" data-date="2026-07-28" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-28" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-28" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-28" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-29">
+  <div class="date-num">29</div>
+  <div class="role-lane" data-date="2026-07-29" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-29" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-29" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-29" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-30">
+  <div class="date-num">30</div>
+  <div class="role-lane" data-date="2026-07-30" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-30" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-30" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-30" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day" data-date="2026-07-31">
+  <div class="date-num">31</div>
+  <div class="role-lane" data-date="2026-07-31" data-role="日中1stコール"><span class="mark"></span><span class="role-short">日1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-31" data-role="夜間1stコール"><span class="mark"></span><span class="role-short">夜1</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-31" data-role="日中2ndコール"><span class="mark"></span><span class="role-short">日2</span><span class="assignment-name"></span></div>
+  <div class="role-lane" data-date="2026-07-31" data-role="夜間2ndコール"><span class="mark"></span><span class="role-short">夜2</span><span class="assignment-name"></span></div>
+</div>
+<div class="day out"></div>
+</div>
+
+  </div>
+  <noscript>
+    <div id="fallbackNote" style="display:block;">JavaScriptが無効です。カレンダー枠は表示されていますが、スクロール連動は動きません。</div>
+  </noscript>
+</div>
+
+<div id="scrollSpace" aria-hidden="true"></div>
+
+<script>
+const DATA = {"year": 2026, "month": 7, "roles": ["日中1stコール", "夜間1stコール", "日中2ndコール", "夜間2ndコール"], "roleShort": {"日中1stコール": "日1", "夜間1stコール": "夜1", "日中2ndコール": "日2", "夜間2ndコール": "夜2"}, "doctors": ["Dr石橋", "Dr新里", "Dr大塚", "Dr嵩原", "Dr平良", "Dr比嘉", "Dr会田", "Dr照屋", "Dr栗原", "Dr松元", "Dr鎌田", "Dr大田"], "solutions": {"Dr石橋": [{"date": "2026-07-01", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-02", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-03", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-04", "shift": "日中1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-04", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-04", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "日中1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-05", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-06", "shift": "夜間1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-07", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-08", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-08", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-09", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-10", "shift": "夜間1stコール", "doctor": "Dr松元"}, {"date": "2026-07-10", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-11", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-11", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-11", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-12", "shift": "日中1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-12", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-12", "shift": "日中2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-12", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-13", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-13", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-14", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-14", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-15", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-15", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-16", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-17", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-17", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-18", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-18", "shift": "夜間1stコール", "doctor": "Dr大田"}, {"date": "2026-07-18", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-19", "shift": "日中1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-19", "shift": "夜間1stコール", "doctor": "Dr松元"}, {"date": "2026-07-19", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-20", "shift": "日中1stコール", "doctor": "Dr大田"}, {"date": "2026-07-20", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-20", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-21", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-21", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-22", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-22", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-23", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-23", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-24", "shift": "夜間1stコール", "doctor": "Dr松元"}, {"date": "2026-07-24", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-25", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-25", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-26", "shift": "日中1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-26", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-26", "shift": "日中2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-26", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-27", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-27", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-28", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-28", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-29", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-29", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-30", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-31", "shift": "夜間1stコール", "doctor": "Dr新里"}], "Dr大塚": [{"date": "2026-07-01", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-02", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-03", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-04", "shift": "日中1stコール", "doctor": "Dr平良"}, {"date": "2026-07-04", "shift": "夜間1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-04", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "日中1stコール", "doctor": "Dr大田"}, {"date": "2026-07-05", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-06", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-06", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-07", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-07", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-08", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-08", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-09", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-10", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-10", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-11", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-12", "shift": "日中1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-12", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-12", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-13", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-13", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-14", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-14", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-15", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-15", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-16", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-17", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-17", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-18", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-18", "shift": "夜間1stコール", "doctor": "Dr大田"}, {"date": "2026-07-18", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-19", "shift": "日中1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-19", "shift": "夜間1stコール", "doctor": "Dr松元"}, {"date": "2026-07-19", "shift": "日中2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-19", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-20", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-20", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-20", "shift": "日中2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-20", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-21", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-21", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-22", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-22", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-23", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-23", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-24", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-24", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-25", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-25", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-26", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-26", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-26", "shift": "日中2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-27", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-27", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-28", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-28", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-29", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-29", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-30", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-31", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-31", "shift": "夜間2ndコール", "doctor": "Dr石橋"}], "Dr嵩原": [{"date": "2026-07-01", "shift": "夜間1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-02", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-03", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-03", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-04", "shift": "日中1stコール", "doctor": "Dr平良"}, {"date": "2026-07-04", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-04", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "日中1stコール", "doctor": "Dr大田"}, {"date": "2026-07-05", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-06", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-06", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-07", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-08", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-08", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-09", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-10", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-10", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-11", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-12", "shift": "日中1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-12", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-12", "shift": "日中2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-12", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-13", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-13", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-14", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-14", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-15", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-15", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-16", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-17", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-17", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-18", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-18", "shift": "夜間1stコール", "doctor": "Dr大田"}, {"date": "2026-07-18", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-19", "shift": "日中1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-19", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-19", "shift": "日中2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-19", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-20", "shift": "日中1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-20", "shift": "夜間1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-20", "shift": "日中2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-21", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-21", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-22", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-22", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-23", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-23", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-24", "shift": "夜間1stコール", "doctor": "Dr松元"}, {"date": "2026-07-24", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-25", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-25", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-25", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-26", "shift": "日中1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-26", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-26", "shift": "日中2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-26", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-27", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-27", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-28", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-28", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-29", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-29", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-30", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-31", "shift": "夜間1stコール", "doctor": "Dr新里"}], "Dr栗原": [{"date": "2026-07-01", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-02", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-03", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-04", "shift": "日中1stコール", "doctor": "Dr平良"}, {"date": "2026-07-04", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-04", "shift": "日中2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-04", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "日中1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-05", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-06", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-06", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-07", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-08", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-08", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-09", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-10", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-10", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-11", "shift": "夜間1stコール", "doctor": "Dr松元"}, {"date": "2026-07-11", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-11", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-12", "shift": "日中1stコール", "doctor": "Dr大田"}, {"date": "2026-07-12", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-12", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-13", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-13", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-14", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-14", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-15", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-15", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-16", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-17", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-17", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-18", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-18", "shift": "夜間1stコール", "doctor": "Dr大田"}, {"date": "2026-07-18", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-19", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-19", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-19", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-20", "shift": "日中1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-20", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-20", "shift": "日中2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-20", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-21", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-21", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-22", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-22", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-23", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-24", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-24", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-25", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-25", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-26", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-26", "shift": "夜間1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-26", "shift": "日中2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-27", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-27", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-28", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-28", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-29", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-29", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-30", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-31", "shift": "夜間1stコール", "doctor": "Dr新里"}], "Dr大田": [{"date": "2026-07-01", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-01", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-02", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-03", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-04", "shift": "日中1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-04", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-04", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "日中1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-05", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-05", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-06", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-06", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-07", "shift": "夜間1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-08", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-08", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-09", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-10", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-10", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-11", "shift": "夜間1stコール", "doctor": "Dr新里"}, {"date": "2026-07-11", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-12", "shift": "日中1stコール", "doctor": "Dr大田"}, {"date": "2026-07-12", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-12", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-13", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-13", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-14", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-14", "shift": "夜間2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-15", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-15", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-16", "shift": "夜間1stコール", "doctor": "Dr大塚"}, {"date": "2026-07-17", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-17", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-18", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-18", "shift": "夜間1stコール", "doctor": "Dr大田"}, {"date": "2026-07-18", "shift": "日中2ndコール", "doctor": "Dr大塚"}, {"date": "2026-07-19", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-19", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-19", "shift": "日中2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-19", "shift": "夜間2ndコール", "doctor": "Dr石橋"}, {"date": "2026-07-20", "shift": "日中1stコール", "doctor": "Dr栗原"}, {"date": "2026-07-20", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-20", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-21", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-21", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-22", "shift": "夜間1stコール", "doctor": "Dr嵩原"}, {"date": "2026-07-23", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-23", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-24", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-24", "shift": "夜間2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "日中1stコール", "doctor": "Dr松元"}, {"date": "2026-07-25", "shift": "夜間1stコール", "doctor": "Dr照屋"}, {"date": "2026-07-25", "shift": "日中2ndコール", "doctor": "Dr新里"}, {"date": "2026-07-25", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-26", "shift": "日中1stコール", "doctor": "Dr会田"}, {"date": "2026-07-26", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-26", "shift": "日中2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-27", "shift": "夜間1stコール", "doctor": "Dr比嘉"}, {"date": "2026-07-27", "shift": "夜間2ndコール", "doctor": "Dr栗原"}, {"date": "2026-07-28", "shift": "夜間1stコール", "doctor": "Dr鎌田"}, {"date": "2026-07-28", "shift": "夜間2ndコール", "doctor": "Dr大田"}, {"date": "2026-07-29", "shift": "夜間1stコール", "doctor": "Dr平良"}, {"date": "2026-07-29", "shift": "夜間2ndコール", "doctor": "Dr嵩原"}, {"date": "2026-07-30", "shift": "夜間1stコール", "doctor": "Dr石橋"}, {"date": "2026-07-31", "shift": "夜間1stコール", "doctor": "Dr会田"}, {"date": "2026-07-31", "shift": "夜間2ndコール", "doctor": "Dr石橋"}]}, "solutionNames": ["Dr石橋", "Dr大塚", "Dr嵩原", "Dr栗原", "Dr大田"], "unavailable": {"Dr石橋": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-05": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-19": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-26": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr新里": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-02": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-06": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-07": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-09": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-14": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-16": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-20": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-21": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-23": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-28": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-30": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr大塚": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-04": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-11": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-19": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-26": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}}, "Dr嵩原": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-04": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-19": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}}, "Dr平良": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr比嘉": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr会田": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr照屋": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr栗原": {"2026-07-01": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-02": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-03": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-05": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-09": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-10": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-15": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-16": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-17": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-19": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-22": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-23": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-24": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-26": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-30": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}, "2026-07-31": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": true}}, "Dr松元": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr鎌田": {"2026-07-01": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-03": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-10": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-17": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-23": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-24": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-31": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}}, "Dr大田": {"2026-07-01": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-02": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-03": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-04": {"日中1stコール": true, "夜間1stコール": true, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-05": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-06": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-07": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-08": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-09": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-10": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-11": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-12": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-13": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-14": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-15": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-16": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-17": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-18": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-19": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-20": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-21": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-22": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-23": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-24": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-25": {"日中1stコール": true, "夜間1stコール": false, "日中2ndコール": true, "夜間2ndコール": false}, "2026-07-26": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-27": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-28": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-29": {"日中1stコール": false, "夜間1stコール": false, "日中2ndコール": false, "夜間2ndコール": false}, "2026-07-30": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}, "2026-07-31": {"日中1stコール": false, "夜間1stコール": true, "日中2ndコール": false, "夜間2ndコール": true}}}, "violations": [{"solution": "Dr大塚", "date": "2026-07-23", "doctor": "Dr大塚", "shift": "夜間2ndコール"}, {"solution": "Dr大田", "date": "2026-07-23", "doctor": "Dr大田", "shift": "夜間2ndコール"}, {"solution": "Dr嵩原", "date": "2026-07-24", "doctor": "Dr嵩原", "shift": "夜間2ndコール"}, {"solution": "Dr栗原", "date": "2026-07-23", "doctor": "Dr栗原", "shift": "夜間1stコール"}, {"solution": "Dr石橋", "date": "2026-07-23", "doctor": "Dr石橋", "shift": "夜間2ndコール"}], "holidays": ["2026-07-20"], "steps": [{"solution": "", "doctorIndex": -1, "mode": "intro", "label": "開始"}, {"solution": "Dr石橋", "doctorIndex": -1, "mode": "solution-start", "label": "Dr石橋 解 開始"}, {"solution": "Dr石橋", "doctorIndex": 0, "mode": "doctor", "label": "Dr石橋 / Dr石橋"}, {"solution": "Dr石橋", "doctorIndex": 1, "mode": "doctor", "label": "Dr石橋 / Dr新里"}, {"solution": "Dr石橋", "doctorIndex": 2, "mode": "doctor", "label": "Dr石橋 / Dr大塚"}, {"solution": "Dr石橋", "doctorIndex": 3, "mode": "doctor", "label": "Dr石橋 / Dr嵩原"}, {"solution": "Dr石橋", "doctorIndex": 4, "mode": "doctor", "label": "Dr石橋 / Dr平良"}, {"solution": "Dr石橋", "doctorIndex": 5, "mode": "doctor", "label": "Dr石橋 / Dr比嘉"}, {"solution": "Dr石橋", "doctorIndex": 6, "mode": "doctor", "label": "Dr石橋 / Dr会田"}, {"solution": "Dr石橋", "doctorIndex": 7, "mode": "doctor", "label": "Dr石橋 / Dr照屋"}, {"solution": "Dr石橋", "doctorIndex": 8, "mode": "doctor", "label": "Dr石橋 / Dr栗原"}, {"solution": "Dr石橋", "doctorIndex": 9, "mode": "doctor", "label": "Dr石橋 / Dr松元"}, {"solution": "Dr石橋", "doctorIndex": 10, "mode": "doctor", "label": "Dr石橋 / Dr鎌田"}, {"solution": "Dr石橋", "doctorIndex": 11, "mode": "doctor", "label": "Dr石橋 / Dr大田"}, {"solution": "Dr石橋", "doctorIndex": 12, "mode": "solution-complete", "label": "Dr石橋 解 完了"}, {"solution": "Dr大塚", "doctorIndex": -1, "mode": "solution-start", "label": "Dr大塚 解 開始"}, {"solution": "Dr大塚", "doctorIndex": 0, "mode": "doctor", "label": "Dr大塚 / Dr石橋"}, {"solution": "Dr大塚", "doctorIndex": 1, "mode": "doctor", "label": "Dr大塚 / Dr新里"}, {"solution": "Dr大塚", "doctorIndex": 2, "mode": "doctor", "label": "Dr大塚 / Dr大塚"}, {"solution": "Dr大塚", "doctorIndex": 3, "mode": "doctor", "label": "Dr大塚 / Dr嵩原"}, {"solution": "Dr大塚", "doctorIndex": 4, "mode": "doctor", "label": "Dr大塚 / Dr平良"}, {"solution": "Dr大塚", "doctorIndex": 5, "mode": "doctor", "label": "Dr大塚 / Dr比嘉"}, {"solution": "Dr大塚", "doctorIndex": 6, "mode": "doctor", "label": "Dr大塚 / Dr会田"}, {"solution": "Dr大塚", "doctorIndex": 7, "mode": "doctor", "label": "Dr大塚 / Dr照屋"}, {"solution": "Dr大塚", "doctorIndex": 8, "mode": "doctor", "label": "Dr大塚 / Dr栗原"}, {"solution": "Dr大塚", "doctorIndex": 9, "mode": "doctor", "label": "Dr大塚 / Dr松元"}, {"solution": "Dr大塚", "doctorIndex": 10, "mode": "doctor", "label": "Dr大塚 / Dr鎌田"}, {"solution": "Dr大塚", "doctorIndex": 11, "mode": "doctor", "label": "Dr大塚 / Dr大田"}, {"solution": "Dr大塚", "doctorIndex": 12, "mode": "solution-complete", "label": "Dr大塚 解 完了"}, {"solution": "Dr嵩原", "doctorIndex": -1, "mode": "solution-start", "label": "Dr嵩原 解 開始"}, {"solution": "Dr嵩原", "doctorIndex": 0, "mode": "doctor", "label": "Dr嵩原 / Dr石橋"}, {"solution": "Dr嵩原", "doctorIndex": 1, "mode": "doctor", "label": "Dr嵩原 / Dr新里"}, {"solution": "Dr嵩原", "doctorIndex": 2, "mode": "doctor", "label": "Dr嵩原 / Dr大塚"}, {"solution": "Dr嵩原", "doctorIndex": 3, "mode": "doctor", "label": "Dr嵩原 / Dr嵩原"}, {"solution": "Dr嵩原", "doctorIndex": 4, "mode": "doctor", "label": "Dr嵩原 / Dr平良"}, {"solution": "Dr嵩原", "doctorIndex": 5, "mode": "doctor", "label": "Dr嵩原 / Dr比嘉"}, {"solution": "Dr嵩原", "doctorIndex": 6, "mode": "doctor", "label": "Dr嵩原 / Dr会田"}, {"solution": "Dr嵩原", "doctorIndex": 7, "mode": "doctor", "label": "Dr嵩原 / Dr照屋"}, {"solution": "Dr嵩原", "doctorIndex": 8, "mode": "doctor", "label": "Dr嵩原 / Dr栗原"}, {"solution": "Dr嵩原", "doctorIndex": 9, "mode": "doctor", "label": "Dr嵩原 / Dr松元"}, {"solution": "Dr嵩原", "doctorIndex": 10, "mode": "doctor", "label": "Dr嵩原 / Dr鎌田"}, {"solution": "Dr嵩原", "doctorIndex": 11, "mode": "doctor", "label": "Dr嵩原 / Dr大田"}, {"solution": "Dr嵩原", "doctorIndex": 12, "mode": "solution-complete", "label": "Dr嵩原 解 完了"}, {"solution": "Dr栗原", "doctorIndex": -1, "mode": "solution-start", "label": "Dr栗原 解 開始"}, {"solution": "Dr栗原", "doctorIndex": 0, "mode": "doctor", "label": "Dr栗原 / Dr石橋"}, {"solution": "Dr栗原", "doctorIndex": 1, "mode": "doctor", "label": "Dr栗原 / Dr新里"}, {"solution": "Dr栗原", "doctorIndex": 2, "mode": "doctor", "label": "Dr栗原 / Dr大塚"}, {"solution": "Dr栗原", "doctorIndex": 3, "mode": "doctor", "label": "Dr栗原 / Dr嵩原"}, {"solution": "Dr栗原", "doctorIndex": 4, "mode": "doctor", "label": "Dr栗原 / Dr平良"}, {"solution": "Dr栗原", "doctorIndex": 5, "mode": "doctor", "label": "Dr栗原 / Dr比嘉"}, {"solution": "Dr栗原", "doctorIndex": 6, "mode": "doctor", "label": "Dr栗原 / Dr会田"}, {"solution": "Dr栗原", "doctorIndex": 7, "mode": "doctor", "label": "Dr栗原 / Dr照屋"}, {"solution": "Dr栗原", "doctorIndex": 8, "mode": "doctor", "label": "Dr栗原 / Dr栗原"}, {"solution": "Dr栗原", "doctorIndex": 9, "mode": "doctor", "label": "Dr栗原 / Dr松元"}, {"solution": "Dr栗原", "doctorIndex": 10, "mode": "doctor", "label": "Dr栗原 / Dr鎌田"}, {"solution": "Dr栗原", "doctorIndex": 11, "mode": "doctor", "label": "Dr栗原 / Dr大田"}, {"solution": "Dr栗原", "doctorIndex": 12, "mode": "solution-complete", "label": "Dr栗原 解 完了"}, {"solution": "Dr大田", "doctorIndex": -1, "mode": "solution-start", "label": "Dr大田 解 開始"}, {"solution": "Dr大田", "doctorIndex": 0, "mode": "doctor", "label": "Dr大田 / Dr石橋"}, {"solution": "Dr大田", "doctorIndex": 1, "mode": "doctor", "label": "Dr大田 / Dr新里"}, {"solution": "Dr大田", "doctorIndex": 2, "mode": "doctor", "label": "Dr大田 / Dr大塚"}, {"solution": "Dr大田", "doctorIndex": 3, "mode": "doctor", "label": "Dr大田 / Dr嵩原"}, {"solution": "Dr大田", "doctorIndex": 4, "mode": "doctor", "label": "Dr大田 / Dr平良"}, {"solution": "Dr大田", "doctorIndex": 5, "mode": "doctor", "label": "Dr大田 / Dr比嘉"}, {"solution": "Dr大田", "doctorIndex": 6, "mode": "doctor", "label": "Dr大田 / Dr会田"}, {"solution": "Dr大田", "doctorIndex": 7, "mode": "doctor", "label": "Dr大田 / Dr照屋"}, {"solution": "Dr大田", "doctorIndex": 8, "mode": "doctor", "label": "Dr大田 / Dr栗原"}, {"solution": "Dr大田", "doctorIndex": 9, "mode": "doctor", "label": "Dr大田 / Dr松元"}, {"solution": "Dr大田", "doctorIndex": 10, "mode": "doctor", "label": "Dr大田 / Dr鎌田"}, {"solution": "Dr大田", "doctorIndex": 11, "mode": "doctor", "label": "Dr大田 / Dr大田"}, {"solution": "Dr大田", "doctorIndex": 12, "mode": "solution-complete", "label": "Dr大田 解 完了"}, {"solution": "Dr大田", "doctorIndex": 12, "mode": "all-complete", "label": "全解確認完了"}]};
+const STEPS = DATA.steps;
+const relaxedSet = new Set(DATA.violations.map(v => `${v.solution}|${v.date}|${v.doctor}|${v.shift}`));
+
+function roleShort(role) {
+  return DATA.roleShort[role] || role;
+}
+function relaxKey(solution, date, doctor, shift) {
+  return `${solution}|${date}|${doctor}|${shift}`;
+}
+function laneFor(dateStr, role) {
+  return document.querySelector(`.role-lane[data-date="${dateStr}"][data-role="${role}"]`);
+}
+function clearViz() {
+  document.querySelectorAll(".role-lane").forEach(l => {
+    l.classList.remove("assigned", "past", "active", "relaxed", "active-unavailable");
+    const name = l.querySelector(".assignment-name");
+    if (name) name.textContent = "";
+  });
+}
+function setText(id, text) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = text;
+}
+function updateViz(stepIndex) {
+  const step = STEPS[Math.max(0, Math.min(STEPS.length - 1, stepIndex))];
+  const solution = step.solution || "";
+  const doctorIndex = Number(step.doctorIndex);
+  const mode = step.mode;
+
+  clearViz();
+
+  const progressPct = (STEPS.length <= 1) ? 0 : (stepIndex / (STEPS.length - 1)) * 100;
+  const fill = document.getElementById("progressFill");
+  if (fill) fill.style.width = `${progressPct}%`;
+  setText("stepCounter", `${stepIndex} / ${STEPS.length - 1}`);
+
+  if (!solution) {
+    setText("candidateTitle", "勤務不可枠と緩和候補の確認");
+    setText("modeText", "スクロールで確認を開始");
+    setText("currentDoctor", "-");
+    setText("relaxText", "緩和候補: " + DATA.violations.map(v => `${v.solution}: ${v.date} ${v.doctor} ${roleShort(v.shift)}`).join(" / "));
+    return;
+  }
+
+  const solIdx = DATA.solutionNames.indexOf(solution);
+  const activeDoctor = DATA.doctors[doctorIndex] || null;
+  setText("candidateTitle", `${solution} 解`);
+  const rels = DATA.violations.filter(v => v.solution === solution);
+  const relText = rels.length ? rels.map(v => `★ ${v.date.slice(5)} ${v.doctor} ${roleShort(v.shift)}`).join(" / ") : "なし";
+  setText("relaxText", `この解の緩和候補: ${relText}`);
+
+  if (activeDoctor && mode === "doctor") {
+    setText("currentDoctor", activeDoctor);
+    setText("modeText", `${solIdx + 1} / ${DATA.solutionNames.length} 解 ・ ${doctorIndex + 1} / ${DATA.doctors.length} 人目を確認中`);
+  } else if (mode === "solution-start") {
+    setText("currentDoctor", "未表示");
+    setText("modeText", `${solIdx + 1} / ${DATA.solutionNames.length} 解 ・ ここから担当を追加`);
+  } else if (mode === "all-complete") {
+    setText("currentDoctor", "全解確認完了");
+    setText("modeText", "すべての解を表示しました");
+  } else {
+    setText("currentDoctor", "全員確認済み");
+    setText("modeText", `${solIdx + 1} / ${DATA.solutionNames.length} 解 ・ 枠が埋まった状態`);
+  }
+
+  if (activeDoctor && mode === "doctor") {
+    const unav = DATA.unavailable[activeDoctor] || {};
+    Object.entries(unav).forEach(([dateStr, roles]) => {
+      Object.entries(roles).forEach(([role, flag]) => {
+        if (!flag) return;
+        const lane = laneFor(dateStr, role);
+        if (lane) lane.classList.add("active-unavailable");
+      });
+    });
+  }
+
+  const rows = DATA.solutions[solution] || [];
+  rows.forEach(r => {
+    const idx = DATA.doctors.indexOf(r.doctor);
+    let status = "future";
+    if (mode === "solution-complete" || mode === "all-complete") {
+      status = "past";
+    } else if (mode === "doctor") {
+      if (idx < doctorIndex) status = "past";
+      else if (idx === doctorIndex) status = "active";
+      else status = "future";
+    } else {
+      status = "future";
+    }
+    if (status === "future") return;
+
+    const lane = laneFor(r.date, r.shift);
+    if (!lane) return;
+    lane.classList.add("assigned", status);
+    if (relaxedSet.has(relaxKey(solution, r.date, r.doctor, r.shift))) {
+      lane.classList.add("relaxed");
+    }
+    const name = lane.querySelector(".assignment-name");
+    if (name) name.textContent = r.doctor.replace(/^Dr/, "");
+  });
+}
+
+let lastIndex = -1;
+function onScroll() {
+  const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+  const ratio = Math.max(0, Math.min(1, window.scrollY / maxScroll));
+  const idx = Math.round(ratio * (STEPS.length - 1));
+  if (idx !== lastIndex) {
+    lastIndex = idx;
+    updateViz(idx);
+  }
+}
+window.addEventListener("scroll", onScroll, { passive: true });
+window.addEventListener("resize", onScroll);
+updateViz(0);
+onScroll();
+</script>
+</body>
+</html>
