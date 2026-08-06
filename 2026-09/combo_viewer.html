@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>コンボ緩和条件ビューア</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-css-reset/2.4.0/reset.min.css">
+<style>
+  body { font-family: sans-serif; margin: 2rem; }
+  h2 { margin-top:1.5rem; }
+  .filter-box { display:flex; flex-wrap:wrap; gap:.5rem; }
+  .filter-box label { white-space:nowrap; }
+  #results li { margin: .25rem 0; }
+  .nohit { color:#888; }
+</style>
+</head>
+<body>
+
+<h1>コンボ緩和条件ビューア</h1>
+<p>成功コンボ数: 38</p>
+
+<h2>① Dr を選択</h2>
+<div id="doctorBox" class="filter-box">
+  <label><input type="checkbox" class="doctor" value="Dr会田"> Dr会田</label><label><input type="checkbox" class="doctor" value="Dr大塚"> Dr大塚</label><label><input type="checkbox" class="doctor" value="Dr大田"> Dr大田</label><label><input type="checkbox" class="doctor" value="Dr嵩原"> Dr嵩原</label><label><input type="checkbox" class="doctor" value="Dr平良"> Dr平良</label><label><input type="checkbox" class="doctor" value="Dr新里"> Dr新里</label><label><input type="checkbox" class="doctor" value="Dr松元"> Dr松元</label><label><input type="checkbox" class="doctor" value="Dr栗原"> Dr栗原</label><label><input type="checkbox" class="doctor" value="Dr比嘉"> Dr比嘉</label><label><input type="checkbox" class="doctor" value="Dr照屋"> Dr照屋</label><label><input type="checkbox" class="doctor" value="Dr石橋"> Dr石橋</label><label><input type="checkbox" class="doctor" value="Dr鎌田"> Dr鎌田</label>
+</div>
+
+<h2>② 枠（日時+コール）を選択</h2>
+<div id="slotBox" class="filter-box">
+  <label><input type="checkbox" class="slot" value="2026-09-04の夜間1stコール"> 2026-09-04の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-05の日中1stコール"> 2026-09-05の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-06の夜間1stコール"> 2026-09-06の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-06の日中1stコール"> 2026-09-06の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-11の夜間1stコール"> 2026-09-11の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-12の夜間1stコール"> 2026-09-12の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-12の日中1stコール"> 2026-09-12の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-13の夜間1stコール"> 2026-09-13の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-13の日中1stコール"> 2026-09-13の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-19の日中1stコール"> 2026-09-19の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-20の日中1stコール"> 2026-09-20の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-21の夜間1stコール"> 2026-09-21の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-21の日中1stコール"> 2026-09-21の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-22の夜間1stコール"> 2026-09-22の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-22の日中1stコール"> 2026-09-22の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-23の日中1stコール"> 2026-09-23の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-24の夜間1stコール"> 2026-09-24の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-26の日中1stコール"> 2026-09-26の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-26の日中2ndコール"> 2026-09-26の日中2ndコール</label><label><input type="checkbox" class="slot" value="2026-09-27の夜間2ndコール"> 2026-09-27の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2026-09-27の日中1stコール"> 2026-09-27の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-27の日中2ndコール"> 2026-09-27の日中2ndコール</label>
+</div>
+
+<h2>③ 該当 solution</h2>
+<ul id="results"></ul>
+
+<script>
+const combos = [{"combo": ["Dr石橋", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の夜間2ndコール不可", "メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-12の日中1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉.pdf"}, {"combo": ["Dr比嘉", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-12の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr栗原.pdf"}, {"combo": ["Dr比嘉", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-20の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr大田.pdf"}, {"combo": ["Dr石橋", "Dr新里", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-26の日中2ndコール不可", "メンバーDr比嘉は2026-09-05の日中1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr新里・Dr比嘉.pdf"}, {"combo": ["Dr石橋", "Dr大塚", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の夜間2ndコール不可", "メンバーDr比嘉は2026-09-13の夜間1stコール不可", "メンバーDr比嘉は2026-09-20の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr大塚・Dr比嘉.pdf"}, {"combo": ["Dr石橋", "Dr嵩原", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の日中2ndコール不可", "メンバーDr比嘉は2026-09-12の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr嵩原・Dr比嘉.pdf"}, {"combo": ["Dr石橋", "Dr平良", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の夜間2ndコール不可", "メンバーDr比嘉は2026-09-05の日中1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr平良・Dr比嘉.pdf"}, {"combo": ["Dr石橋", "Dr比嘉", "Dr会田"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の日中2ndコール不可", "メンバーDr比嘉は2026-09-19の日中1stコール不可", "メンバーDr比嘉は2026-09-22の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉・Dr会田.pdf"}, {"combo": ["Dr石橋", "Dr比嘉", "Dr照屋"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の日中2ndコール不可", "メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉・Dr照屋.pdf"}, {"combo": ["Dr石橋", "Dr比嘉", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉・Dr栗原.pdf"}, {"combo": ["Dr石橋", "Dr比嘉", "Dr松元"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-27の日中2ndコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉・Dr松元.pdf"}, {"combo": ["Dr石橋", "Dr比嘉", "Dr鎌田"], "min_relaxed": 3, "conditions": ["メンバーDr石橋は2026-09-26の日中2ndコール不可", "メンバーDr比嘉は2026-09-13の夜間1stコール不可", "メンバーDr比嘉は2026-09-05の日中1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉・Dr鎌田.pdf"}, {"combo": ["Dr石橋", "Dr比嘉", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr石橋・Dr比嘉・Dr大田.pdf"}, {"combo": ["Dr新里", "Dr嵩原", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-13の夜間1stコール不可", "メンバーDr比嘉は2026-09-22の夜間1stコール不可"], "solution": "production/solution_Dr新里・Dr嵩原・Dr比嘉.pdf"}, {"combo": ["Dr新里", "Dr比嘉", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr新里・Dr比嘉・Dr栗原.pdf"}, {"combo": ["Dr新里", "Dr比嘉", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr比嘉は2026-09-23の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr新里・Dr比嘉・Dr大田.pdf"}, {"combo": ["Dr大塚", "Dr嵩原", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可"], "solution": "production/solution_Dr大塚・Dr嵩原・Dr比嘉.pdf"}, {"combo": ["Dr大塚", "Dr比嘉", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-19の日中1stコール不可", "メンバーDr比嘉は2026-09-22の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr大塚・Dr比嘉・Dr栗原.pdf"}, {"combo": ["Dr大塚", "Dr比嘉", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr大田は2026-09-26の日中2ndコール不可"], "solution": "production/solution_Dr大塚・Dr比嘉・Dr大田.pdf"}, {"combo": ["Dr嵩原", "Dr平良", "Dr比嘉"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可"], "solution": "production/solution_Dr嵩原・Dr平良・Dr比嘉.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉", "Dr会田"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-19の日中1stコール不可", "メンバーDr比嘉は2026-09-22の日中1stコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉・Dr会田.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉", "Dr照屋"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉・Dr照屋.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉・Dr栗原.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉", "Dr松元"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr比嘉は2026-09-19の日中1stコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉・Dr松元.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉", "Dr鎌田"], "min_relaxed": 3, "conditions": ["メンバーDr嵩原は2026-09-24の夜間1stコール不可", "メンバーDr比嘉は2026-09-05の日中1stコール不可", "メンバーDr比嘉は2026-09-19の日中1stコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉・Dr鎌田.pdf"}, {"combo": ["Dr嵩原", "Dr比嘉", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-12の日中1stコール不可", "メンバーDr比嘉は2026-09-26の日中1stコール不可", "メンバーDr大田は2026-09-26の日中2ndコール不可"], "solution": "production/solution_Dr嵩原・Dr比嘉・Dr大田.pdf"}, {"combo": ["Dr平良", "Dr比嘉", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr比嘉は2026-09-20の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr平良・Dr比嘉・Dr栗原.pdf"}, {"combo": ["Dr平良", "Dr比嘉", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の夜間1stコール不可", "メンバーDr比嘉は2026-09-13の夜間1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr平良・Dr比嘉・Dr大田.pdf"}, {"combo": ["Dr比嘉", "Dr会田", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr栗原は2026-09-27の夜間2ndコール不可"], "solution": "production/solution_Dr比嘉・Dr会田・Dr栗原.pdf"}, {"combo": ["Dr比嘉", "Dr会田", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-12の夜間1stコール不可", "メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr会田・Dr大田.pdf"}, {"combo": ["Dr比嘉", "Dr照屋", "Dr栗原"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-21の夜間1stコール不可", "メンバーDr比嘉は2026-09-23の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr照屋・Dr栗原.pdf"}, {"combo": ["Dr比嘉", "Dr照屋", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-21の日中1stコール不可", "メンバーDr比嘉は2026-09-27の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr照屋・Dr大田.pdf"}, {"combo": ["Dr比嘉", "Dr栗原", "Dr松元"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-04の夜間1stコール不可", "メンバーDr比嘉は2026-09-06の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr栗原・Dr松元.pdf"}, {"combo": ["Dr比嘉", "Dr栗原", "Dr鎌田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-11の夜間1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr栗原は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr栗原・Dr鎌田.pdf"}, {"combo": ["Dr比嘉", "Dr栗原", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-05の日中1stコール不可", "メンバーDr比嘉は2026-09-12の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr栗原・Dr大田.pdf"}, {"combo": ["Dr比嘉", "Dr松元", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-05の日中1stコール不可", "メンバーDr比嘉は2026-09-20の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr松元・Dr大田.pdf"}, {"combo": ["Dr比嘉", "Dr鎌田", "Dr大田"], "min_relaxed": 3, "conditions": ["メンバーDr比嘉は2026-09-06の夜間1stコール不可", "メンバーDr比嘉は2026-09-13の日中1stコール不可", "メンバーDr大田は2026-09-24の夜間1stコール不可"], "solution": "production/solution_Dr比嘉・Dr鎌田・Dr大田.pdf"}];
+
+function updateResults() {
+  const selectedDrs   = Array.from(document.querySelectorAll('.doctor:checked')).map(el=>el.value);
+  const selectedSlots = Array.from(document.querySelectorAll('.slot:checked'  )).map(el=>el.value);
+
+  const hits = combos.filter(c => {
+      const condStr = (c.conditions || []).join(" ");
+      const drOK    = selectedDrs.every(dr => condStr.includes(dr));
+      const slotOK  = selectedSlots.every(sl => condStr.includes(sl));
+      return drOK && slotOK;
+  });
+
+  const ul = document.getElementById('results');
+  ul.innerHTML = '';
+  if (hits.length === 0) {
+     ul.innerHTML = '<li class="nohit">該当なし</li>';
+  } else {
+     hits.forEach(c => {
+        const li = document.createElement('li');
+        const a  = document.createElement('a');
+        a.href = c.solution;
+        a.textContent = c.solution;
+        a.target = "_blank";
+        li.appendChild(a);
+
+        if (c.conditions && c.conditions.length) {
+            const span = document.createElement('span');
+            span.style.marginLeft = '0.5rem';
+            span.textContent = '— ' + c.conditions.join(' / ');
+            li.appendChild(span);
+        }
+
+        ul.appendChild(li);
+     });
+  }
+}
+
+document.querySelectorAll('.doctor, .slot').forEach(el => el.addEventListener('change', updateResults));
+window.addEventListener('load', updateResults);
+</script>
+
+</body>
+</html>
