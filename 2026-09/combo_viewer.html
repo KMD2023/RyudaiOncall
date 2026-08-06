@@ -18,12 +18,12 @@
 <h1>コンボ緩和条件ビューア</h1>
 <p>成功コンボ数: 38</p>
 
-<h2>① Dr を選択</h2>
+<h2>① Dr を選択（コンボ＝緩和対象に含まれる人）</h2>
 <div id="doctorBox" class="filter-box">
   <label><input type="checkbox" class="doctor" value="Dr会田"> Dr会田</label><label><input type="checkbox" class="doctor" value="Dr大塚"> Dr大塚</label><label><input type="checkbox" class="doctor" value="Dr大田"> Dr大田</label><label><input type="checkbox" class="doctor" value="Dr嵩原"> Dr嵩原</label><label><input type="checkbox" class="doctor" value="Dr平良"> Dr平良</label><label><input type="checkbox" class="doctor" value="Dr新里"> Dr新里</label><label><input type="checkbox" class="doctor" value="Dr松元"> Dr松元</label><label><input type="checkbox" class="doctor" value="Dr栗原"> Dr栗原</label><label><input type="checkbox" class="doctor" value="Dr比嘉"> Dr比嘉</label><label><input type="checkbox" class="doctor" value="Dr照屋"> Dr照屋</label><label><input type="checkbox" class="doctor" value="Dr石橋"> Dr石橋</label><label><input type="checkbox" class="doctor" value="Dr鎌田"> Dr鎌田</label>
 </div>
 
-<h2>② 枠（日時+コール）を選択</h2>
+<h2>② 枠（日時+コール）を選択（実際に外した勤務不可）</h2>
 <div id="slotBox" class="filter-box">
   <label><input type="checkbox" class="slot" value="2026-09-04の夜間1stコール"> 2026-09-04の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-05の日中1stコール"> 2026-09-05の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-06の夜間1stコール"> 2026-09-06の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-06の日中1stコール"> 2026-09-06の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-11の夜間1stコール"> 2026-09-11の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-12の夜間1stコール"> 2026-09-12の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-12の日中1stコール"> 2026-09-12の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-13の夜間1stコール"> 2026-09-13の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-13の日中1stコール"> 2026-09-13の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-19の日中1stコール"> 2026-09-19の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-20の日中1stコール"> 2026-09-20の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-21の夜間1stコール"> 2026-09-21の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-21の日中1stコール"> 2026-09-21の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-22の夜間1stコール"> 2026-09-22の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-22の日中1stコール"> 2026-09-22の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-23の日中1stコール"> 2026-09-23の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-24の夜間1stコール"> 2026-09-24の夜間1stコール</label><label><input type="checkbox" class="slot" value="2026-09-26の日中1stコール"> 2026-09-26の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-26の日中2ndコール"> 2026-09-26の日中2ndコール</label><label><input type="checkbox" class="slot" value="2026-09-27の夜間2ndコール"> 2026-09-27の夜間2ndコール</label><label><input type="checkbox" class="slot" value="2026-09-27の日中1stコール"> 2026-09-27の日中1stコール</label><label><input type="checkbox" class="slot" value="2026-09-27の日中2ndコール"> 2026-09-27の日中2ndコール</label>
 </div>
@@ -39,9 +39,14 @@ function updateResults() {
   const selectedSlots = Array.from(document.querySelectorAll('.slot:checked'  )).map(el=>el.value);
 
   const hits = combos.filter(c => {
+      // Dr: コンボ（緩和対象メンバー）に含まれるか
+      // ※ min 緩和ではコンボ内の一部メンバーの制約だけ外すことがあるため、
+      //   conditions 文字列ではなく combo 配列で判定する
+      const combo = c.combo || [];
+      const drOK = selectedDrs.every(dr => combo.includes(dr));
+      // 枠: 実際に緩和された条件テキストに含まれるか
       const condStr = (c.conditions || []).join(" ");
-      const drOK    = selectedDrs.every(dr => condStr.includes(dr));
-      const slotOK  = selectedSlots.every(sl => condStr.includes(sl));
+      const slotOK = selectedSlots.every(sl => condStr.includes(sl));
       return drOK && slotOK;
   });
 
@@ -58,11 +63,18 @@ function updateResults() {
         a.target = "_blank";
         li.appendChild(a);
 
+        const meta = document.createElement('span');
+        meta.style.marginLeft = '0.5rem';
+        const parts = [];
+        if (c.combo && c.combo.length) {
+            parts.push('対象: ' + c.combo.join('・'));
+        }
         if (c.conditions && c.conditions.length) {
-            const span = document.createElement('span');
-            span.style.marginLeft = '0.5rem';
-            span.textContent = '— ' + c.conditions.join(' / ');
-            li.appendChild(span);
+            parts.push(c.conditions.join(' / '));
+        }
+        if (parts.length) {
+            meta.textContent = '— ' + parts.join(' | ');
+            li.appendChild(meta);
         }
 
         ul.appendChild(li);
